@@ -1,0 +1,1344 @@
+{
+  "name": "Content Repurposing Engine",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Content Repurposing Intake",
+        "formDescription": "Drop in one long-form piece and get platform-native drafts in Slack for approval.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Source Type",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Article"
+                  },
+                  {
+                    "option": "YouTube"
+                  },
+                  {
+                    "option": "Paste Text"
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Source URL",
+              "placeholder": "https://... (leave empty for Paste Text)"
+            },
+            {
+              "fieldLabel": "Pasted Text",
+              "fieldType": "textarea",
+              "placeholder": "Only used when Source Type is Paste Text"
+            },
+            {
+              "fieldLabel": "Campaign Notes",
+              "fieldType": "textarea",
+              "placeholder": "Anything to emphasise, a CTA to include, an angle to avoid..."
+            }
+          ]
+        },
+        "options": {
+          "buttonLabel": "Generate drafts",
+          "respondWithOptions": {
+            "values": {
+              "formSubmittedText": "Got it. Drafts will land in Slack for review in a minute or two."
+            }
+          }
+        }
+      },
+      "id": "b80096f8-6c2f-42e4-b628-834b42970590",
+      "name": "Content Intake Form",
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [
+        -32,
+        832
+      ],
+      "webhookId": "5661dcc2-9376-4420-ba3c-7f89236795ab"
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "app5QpCvANtfCIxJO",
+          "mode": "id"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "id",
+          "value": "tblFH58bQwABeBi5A"
+        },
+        "filterByFormula": "=AND({Source URL}='{{ ($json['Source URL'] || '').trim() }}', {Source URL}!='')",
+        "options": {}
+      },
+      "id": "afa47d6a-c025-4e71-aa12-2ee99835dacd",
+      "name": "Check for Duplicate",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        192,
+        832
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "ludORrmbHDHsOb7s",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c0000000-0000-4000-8000-000000000001",
+              "leftValue": "={{ $json.id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "cfca24f1-564c-45f5-beba-7cb05e8eef63",
+      "name": "Is New Content?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        416,
+        832
+      ]
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "#content-approvals"
+        },
+        "text": "=⏭️ Skipped — this source was already processed: {{ $('Content Intake Form').first().json['Source URL'] }}\nExisting record: https://airtable.com/appXXXXXXXXXXXXXX/tblXXXXXXXXXXXXXX/{{ $json.id }}",
+        "otherOptions": {}
+      },
+      "id": "4a7d8873-a0dc-42d9-88b0-e55ffafe0934",
+      "name": "Notify Duplicate",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        624,
+        1072
+      ],
+      "webhookId": "435331bf-039d-47dd-bd76-995017993007",
+      "credentials": {
+        "slackApi": {
+          "id": "dDJdJQJxmlKeBM0J",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "c0000000-0000-4000-8000-000000000002",
+                    "leftValue": "={{ $('Content Intake Form').first().json['Source Type'] }}",
+                    "rightValue": "Article",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Article"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "c0000000-0000-4000-8000-000000000003",
+                    "leftValue": "={{ $('Content Intake Form').first().json['Source Type'] }}",
+                    "rightValue": "YouTube",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "YouTube"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "c0000000-0000-4000-8000-000000000004",
+                    "leftValue": "={{ $('Content Intake Form').first().json['Source Type'] }}",
+                    "rightValue": "Paste Text",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Paste Text"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "33dbb932-ae0f-46a0-82b2-5a482b7c206e",
+      "name": "Route by Source Type",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        624,
+        832
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $('Content Intake Form').first().json['Source URL'] }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36"
+            },
+            {
+              "name": "Accept",
+              "value": "text/html,application/xhtml+xml"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "text"
+            }
+          },
+          "timeout": 20000
+        }
+      },
+      "id": "026278b4-001c-4856-ba3a-8f2a8317941c",
+      "name": "Fetch Article Page",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        864,
+        640
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000
+    },
+    {
+      "parameters": {
+        "operation": "extractHtmlContent",
+        "extractionValues": {
+          "values": [
+            {
+              "key": "title",
+              "cssSelector": "title"
+            },
+            {
+              "key": "article",
+              "cssSelector": "article"
+            },
+            {
+              "key": "body",
+              "cssSelector": "body"
+            }
+          ]
+        },
+        "options": {
+          "trimValues": true,
+          "cleanUpText": true
+        }
+      },
+      "id": "8a492115-d389-43f1-bc5a-86253bbd294f",
+      "name": "Extract Article Text",
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1.2,
+      "position": [
+        1088,
+        640
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://api.supadata.ai/v1/youtube/transcript",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "url",
+              "value": "={{ $('Content Intake Form').first().json['Source URL'] }}"
+            },
+            {
+              "name": "text",
+              "value": "true"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "sd_affd47a02c79e26c40f57d3006820864"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "381c08ff-fcc5-4816-b1be-2ff7f2d4fe04",
+      "name": "Fetch YouTube Transcript",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        864,
+        832
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 3000
+    },
+    {
+      "parameters": {
+        "jsCode": "// Turns whichever branch ran into one clean, consistent item.\nconst form = $('Content Intake Form').first().json;\nconst incoming = ($input.first() && $input.first().json) || {};\nconst type = form['Source Type'];\nconst url = String(form['Source URL'] || '').trim();\n\nif (type !== 'Paste Text' && !url) {\n  throw new Error('Source URL is required for Article and YouTube sources.');\n}\n\nlet title = '';\nlet text = '';\n\nif (type === 'Article') {\n  const article = String(incoming.article || '').trim();\n  const body = String(incoming.body || '').trim();\n  // Prefer the <article> element; fall back to <body> when the site does not use it.\n  text = article.length > 500 ? article : body;\n  title = String(incoming.title || '').trim() || url;\n} else if (type === 'YouTube') {\n  // Supadata returns { content: \"...\" } when text=true. Change this if you use a different provider.\n  text = typeof incoming.content === 'string' ? incoming.content : String(incoming.transcript || '');\n  title = incoming.title || url;\n} else {\n  text = String(form['Pasted Text'] || '');\n  title = 'Pasted content';\n}\n\ntext = text.replace(/\\s+/g, ' ').trim();\n// Cap sized for the Ollama Context Length of 16384 (roughly 32k characters plus prompt). Raise both together if your machine allows.\nif (text.length > 32000) text = text.slice(0, 32000);\n\nif (text.length < 200) {\n  throw new Error(`Could not extract enough text from the source (${text.length} characters). Check the URL or use the Paste Text option.`);\n}\n\nreturn [{\n  json: {\n    title,\n    sourceUrl: url,\n    sourceType: type,\n    notes: String(form['Campaign Notes'] || '').trim(),\n    text,\n    wordCount: text.split(' ').length,\n  },\n}];"
+      },
+      "id": "aee2168e-e3ce-4399-a963-77f3b0aaa382",
+      "name": "Normalize Content",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1312,
+        832
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a senior content strategist. Read the long-form content below and produce a structured brief that will be used to write social media posts.\n\nBe concrete and specific. Pull real insights, numbers, and phrases from the content rather than generic observations. Quotable lines must be verbatim or near-verbatim from the source. Do not invent anything that is not in the content.\n\nTITLE: {{ $('Normalize Content').first().json.title }}\nSOURCE TYPE: {{ $('Normalize Content').first().json.sourceType }}\nCAMPAIGN NOTES FROM THE TEAM: {{ $('Normalize Content').first().json.notes || 'None' }}\n\nCONTENT:\n{{ $('Normalize Content').first().json.text }}",
+        "hasOutputParser": true,
+        "messages": {
+          "messageValues": []
+        }
+      },
+      "id": "ed172be9-b699-4309-9871-bd19717d1b23",
+      "name": "Analyze Content",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.4,
+      "position": [
+        1536,
+        832
+      ]
+    },
+    {
+      "parameters": {
+        "model": "qwen2.5:1.5b",
+        "options": {
+          "temperature": 0.4,
+          "keepAlive": "30m",
+          "numCtx": 6738,
+          "format": "json"
+        }
+      },
+      "id": "6fe5fe9e-728b-4919-9e38-769e0319a3e9",
+      "name": "Ollama Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        1728,
+        1088
+      ],
+      "credentials": {
+        "ollamaApi": {
+          "id": "Kt3LxZiP0Rrie85P",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"suggested_title\": { \"type\": \"string\", \"description\": \"A short, specific working title for this content\" },\n    \"core_message\": { \"type\": \"string\", \"description\": \"The single most important idea, in one or two sentences\" },\n    \"key_insights\": { \"type\": \"array\", \"items\": { \"type\": \"string\" }, \"description\": \"3 to 5 specific, non-obvious takeaways\" },\n    \"quotable_lines\": { \"type\": \"array\", \"items\": { \"type\": \"string\" }, \"description\": \"2 to 4 short verbatim lines worth quoting\" },\n    \"target_audience\": { \"type\": \"string\", \"description\": \"Who this content is for and what they care about\" },\n    \"hook_angles\": { \"type\": \"array\", \"items\": { \"type\": \"string\" }, \"description\": \"3 different angles that could open a post: contrarian, story, data, question\" },\n    \"tone\": { \"type\": \"string\", \"description\": \"The tone of the source, e.g. practical, provocative, educational\" }\n  },\n  \"required\": [\"suggested_title\", \"core_message\", \"key_insights\", \"quotable_lines\", \"target_audience\", \"hook_angles\", \"tone\"]\n}"
+      },
+      "id": "bf46b57e-87d7-483c-826f-734cd642067a",
+      "name": "Brief Parser",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        1552,
+        1088
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a social media copywriter for YOUR BRAND NAME. Write platform-native drafts based on the content brief below. Every draft must stand on its own, stay faithful to the source, and never invent facts, numbers, or quotes that are not in the brief.\n\nBRAND VOICE:\n- Tone: professional and polished, but warm and approachable — never stiff or overly corporate.\n- Audience: everyday consumers, not industry insiders. Avoid jargon; explain benefits in plain, clear language.\n- Sentence style: confident, concise sentences. No hype, no excessive exclamation points, no clickbait phrasing.\n- Vocabulary: plain English. Contractions (e.g. \"you're,\" \"it's\") are fine — they keep things human without sacrificing polish.\n- Structure: lead with the value to the reader before any feature or technical detail.\n- Avoid: slang, emojis, ALL CAPS, aggressive sales language, or casual openers like \"hey guys.\"\n- Calls to action: clear and direct (e.g. \"Learn more,\" \"See how it works\") rather than urgency-driven or pushy.\n\nClear, confident, and practical. Short sentences. No hype words like \"game-changing\", \"unlock\", or \"revolutionary\". Speak to the reader as a smart peer, not a customer. Use plain English and concrete examples. British or American spelling: American.\n\nPLATFORM RULES\n- linkedin_post: 900 to 1,800 characters. Open with a one-line hook (never \"I'm excited to share\"). Short paragraphs with line breaks. End with a question or a clear call to action. No hashtags in the body; at most 3 on the final line.\n- x_thread: 4 to 7 tweets. Each tweet under 260 characters. Tweet 1 is the hook and must work on its own. Do NOT number the tweets; numbering is added later. Final tweet summarizes or points back to the source.\n- instagram_caption: 400 to 1,200 characters. First line is the hook (it shows before \"more\"). Conversational, line breaks between thoughts. No hashtags inside the caption.\n- hashtags: 8 to 15 specific, relevant Instagram hashtags as plain words without the # symbol.\n- newsletter_subject: under 50 characters, benefit or curiosity driven, no clickbait.\n- newsletter_blurb: 80 to 150 words teasing the content, with the link written as [LINK].\n- image_prompts: 2 to 3 prompts for an image generator describing a clean, on-brand visual. No text in the image, no logos, no people's faces.\n\nCONTENT BRIEF:\n{{ JSON.stringify($json.output, null, 2) }}\n\nSOURCE URL: {{ $('Normalize Content').first().json.sourceUrl || 'n/a' }}\nCAMPAIGN NOTES: {{ $('Normalize Content').first().json.notes || 'None' }}",
+        "hasOutputParser": true
+      },
+      "id": "9d104e9c-f109-49e2-82fd-da79d2b0f5f7",
+      "name": "Generate Platform Drafts",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.4,
+      "position": [
+        1888,
+        832
+      ]
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"linkedin_post\": { \"type\": \"string\" },\n    \"x_thread\": { \"type\": \"array\", \"items\": { \"type\": \"string\" } },\n    \"instagram_caption\": { \"type\": \"string\" },\n    \"hashtags\": { \"type\": \"array\", \"items\": { \"type\": \"string\" } },\n    \"newsletter_subject\": { \"type\": \"string\" },\n    \"newsletter_blurb\": { \"type\": \"string\" },\n    \"image_prompts\": { \"type\": \"array\", \"items\": { \"type\": \"string\" } }\n  },\n  \"required\": [\"linkedin_post\", \"x_thread\", \"instagram_caption\", \"hashtags\", \"newsletter_subject\", \"newsletter_blurb\", \"image_prompts\"]\n}"
+      },
+      "id": "29beb8aa-d449-4d00-b65e-ed4155707e37",
+      "name": "Drafts Parser",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        2048,
+        1088
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Flattens the brief + drafts into one record whose keys match the Airtable field names exactly.\nconst brief = ($('Analyze Content').first().json.output) || {};\nconst drafts = ($input.first().json.output) || {};\nconst src = $('Normalize Content').first().json;\n\nconst tweets = Array.isArray(drafts.x_thread) ? drafts.x_thread : [];\nconst thread = tweets.map((t, i) => `${i + 1}/ ${String(t).trim()}`).join('\\n\\n');\n\n// Platform limit checks — surfaced in Slack and stored on the record.\nconst warnings = [];\nif ((drafts.linkedin_post || '').length > 3000) warnings.push('LinkedIn post is over 3,000 characters');\ntweets.forEach((t, i) => { if (String(t).length > 280) warnings.push(`Tweet ${i + 1} is over 280 characters`); });\nif ((drafts.instagram_caption || '').length > 2200) warnings.push('Instagram caption is over 2,200 characters');\n\nconst bullets = (arr) => (Array.isArray(arr) ? arr : []).map((x) => `• ${x}`).join('\\n');\nconst hashtags = (Array.isArray(drafts.hashtags) ? drafts.hashtags : [])\n  .map((h) => '#' + String(h).replace(/^#/, '').replace(/\\s+/g, ''))\n  .join(' ');\n\nreturn [{\n  json: {\n    'Title': brief.suggested_title || src.title,\n    'Source URL': src.sourceUrl,\n    'Source Type': src.sourceType,\n    'Status': 'Draft',\n    'Core Message': brief.core_message || '',\n    'Key Insights': bullets(brief.key_insights),\n    'Target Audience': brief.target_audience || '',\n    'LinkedIn Post': drafts.linkedin_post || '',\n    'X Thread': thread,\n    'Instagram Caption': drafts.instagram_caption || '',\n    'Hashtags': hashtags,\n    'Newsletter Subject': drafts.newsletter_subject || '',\n    'Newsletter Blurb': drafts.newsletter_blurb || '',\n    'Image Prompts': bullets(drafts.image_prompts),\n    'Warnings': warnings.join('\\n'),\n  },\n}];"
+      },
+      "id": "4f3e4359-3279-49ca-bed4-ba028eb1d273",
+      "name": "Assemble Record",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2256,
+        832
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "base": {
+          "__rl": true,
+          "value": "app5QpCvANtfCIxJO",
+          "mode": "id"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblFH58bQwABeBi5A",
+          "mode": "id"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Source URL": "=   {{ $('Content Intake Form').item.json['Source URL'] }}"
+          },
+          "matchingColumns": [
+            "Source URL"
+          ],
+          "schema": [
+            {
+              "id": "Record ID",
+              "displayName": "Record ID",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "To do",
+                  "value": "To do"
+                },
+                {
+                  "name": "In progress",
+                  "value": "In progress"
+                },
+                {
+                  "name": "Done",
+                  "value": "Done"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Start date",
+              "displayName": "Start date",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Deadline",
+              "displayName": "Deadline",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Assets",
+              "displayName": "Assets",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Source URL",
+              "displayName": "Source URL",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "a3c69a98-b6d0-4da0-930d-5d44c3c69d2a",
+      "name": "Save Draft to Airtable",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        2464,
+        832
+      ],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "ludORrmbHDHsOb7s",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "operation": "sendAndWait",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "#content-approvals"
+        },
+        "message": "=*New content ready for review*\n*{{ $('Assemble Record').first().json.Title }}*\nSource: {{ $('Assemble Record').first().json['Source URL'] || 'pasted text' }}\n{{ $('Assemble Record').first().json.Warnings ? '⚠️ ' + $('Assemble Record').first().json.Warnings.split('\\n').join(' · ') : '' }}\n\n*LinkedIn draft*\n{{ $('Assemble Record').first().json['LinkedIn Post'].slice(0, 1500) }}{{ $('Assemble Record').first().json['LinkedIn Post'].length > 1500 ? '…' : '' }}\n\nFull drafts (X thread, Instagram, newsletter, image prompts) are in Airtable:\nhttps://airtable.com/app5QpCvANtfCIxJO/tblFH58bQwABeBi5A/viw71Oz2bgzXmHSu3{{ $json.id }}\n\nApproving publishes the LinkedIn post now. Rejecting archives the record.",
+        "approvalOptions": {
+          "values": {
+            "approvalType": "double",
+            "approveLabel": "Approve & publish",
+            "disapproveLabel": "Reject"
+          }
+        },
+        "options": {
+          "limitWaitTime": {
+            "values": {
+              "resumeAmount": 48
+            }
+          }
+        }
+      },
+      "id": "44e92ffb-2fea-49f6-b83d-5ec306083378",
+      "name": "Request Approval in Slack",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        2912,
+        832
+      ],
+      "webhookId": "6ea63d12-ac91-4fe6-ae60-a0539051ec07",
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "i9q0Sr5zzFsguCl8",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c0000000-0000-4000-8000-000000000005",
+              "leftValue": "={{ $json.data.approved }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "c9b8cfea-61fa-4d88-bcc7-7e0744fd1beb",
+      "name": "Approved?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        3136,
+        832
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "app5QpCvANtfCIxJO",
+          "mode": "id"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblFH58bQwABeBi5A",
+          "mode": "id"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Source URL": "={{ $('Content Intake Form').item.json['Source URL'] }}",
+            "Record ID": "={{ $('Save Draft to Airtable').first().json.id }}"
+          },
+          "matchingColumns": [
+            "Record ID"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Source URL",
+              "displayName": "Source URL",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Record ID",
+              "displayName": "Record ID",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "typecast": true
+        }
+      },
+      "id": "8caa270e-337a-4801-a3b3-46b46d6ff8f5",
+      "name": "Mark Approved",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        3360,
+        720
+      ],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "ludORrmbHDHsOb7s",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "person": "DpnfyEJUPL",
+        "text": "={{ $('Assemble Record').first().json['LinkedIn Post'] }}",
+        "additionalFields": {}
+      },
+      "id": "5383203a-70fa-4c8d-8c43-f776ddf14dc1",
+      "name": "Publish to LinkedIn",
+      "type": "n8n-nodes-base.linkedIn",
+      "typeVersion": 1,
+      "position": [
+        3568,
+        720
+      ],
+      "credentials": {
+        "linkedInOAuth2Api": {
+          "id": "BciDGU8WHZRjJJXq",
+          "name": "LinkedIn account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "app5QpCvANtfCIxJO",
+          "mode": "id"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblFH58bQwABeBi5A",
+          "mode": "id"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "Source URL",
+              "displayName": "Source URL",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Record ID",
+              "displayName": "Record ID",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "typecast": true
+        }
+      },
+      "id": "e7934580-94ce-42d2-9819-43447b1bbc0b",
+      "name": "Mark Published",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        3792,
+        720
+      ],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "ludORrmbHDHsOb7s",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "#content-approvals"
+        },
+        "text": "=✅ Published to LinkedIn: *{{ $('Assemble Record').first().json.Title }}*\nThe X thread, Instagram caption, and newsletter blurb are marked Published in Airtable and ready to schedule.",
+        "otherOptions": {}
+      },
+      "id": "defdd426-00af-4863-8e1d-f32ec0c7c41c",
+      "name": "Notify Published",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        4016,
+        720
+      ],
+      "webhookId": "9ac1c91c-a222-4ed6-8048-cb054ac68574",
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "i9q0Sr5zzFsguCl8",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "app5QpCvANtfCIxJO",
+          "mode": "id"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblFH58bQwABeBi5A",
+          "mode": "id"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Record ID": "={{ $('Save Draft to Airtable').first().json.id }}",
+            "Source URL": "={{ $('Content Intake Form').item.json['Source URL'] }}"
+          },
+          "matchingColumns": [
+            "Record ID"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Source URL",
+              "displayName": "Source URL",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Record ID",
+              "displayName": "Record ID",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "typecast": true
+        }
+      },
+      "id": "b9f429fb-50a2-4c69-8e4b-f7af5758d346",
+      "name": "Mark Rejected",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        3360,
+        976
+      ],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "ludORrmbHDHsOb7s",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "mode": "name",
+          "value": "#content-approvals"
+        },
+        "text": "=❌ Rejected: *{{ $('Assemble Record').first().json.Title }}* — record marked Rejected in Airtable. Edit the drafts there and re-run if needed.",
+        "otherOptions": {}
+      },
+      "id": "c0b5635b-2319-4f7c-acd6-3ec18f51ead8",
+      "name": "Notify Rejected",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        3568,
+        976
+      ],
+      "webhookId": "402be0f9-db17-4ac4-a644-999af1a42a4e",
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "i9q0Sr5zzFsguCl8",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "app5QpCvANtfCIxJO",
+          "mode": "id"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblFH58bQwABeBi5A",
+          "mode": "id"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Source URL": "={{ $json.fields['Source URL'] }}",
+            "Record ID": "={{ $json.id }}"
+          },
+          "matchingColumns": [
+            "Source URL"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Source URL",
+              "displayName": "Source URL",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Record ID",
+              "displayName": "Record ID",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        2688,
+        832
+      ],
+      "id": "0c60e2a6-6d01-4bd3-bcbe-56c6a309871d",
+      "name": "Update record",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "ludORrmbHDHsOb7s",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Content Intake Form": {
+      "main": [
+        [
+          {
+            "node": "Check for Duplicate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check for Duplicate": {
+      "main": [
+        [
+          {
+            "node": "Is New Content?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is New Content?": {
+      "main": [
+        [
+          {
+            "node": "Route by Source Type",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Notify Duplicate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route by Source Type": {
+      "main": [
+        [
+          {
+            "node": "Fetch Article Page",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Fetch YouTube Transcript",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Normalize Content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Article Page": {
+      "main": [
+        [
+          {
+            "node": "Extract Article Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Article Text": {
+      "main": [
+        [
+          {
+            "node": "Normalize Content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch YouTube Transcript": {
+      "main": [
+        [
+          {
+            "node": "Normalize Content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Content": {
+      "main": [
+        [
+          {
+            "node": "Analyze Content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze Content": {
+      "main": [
+        [
+          {
+            "node": "Generate Platform Drafts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Platform Drafts": {
+      "main": [
+        [
+          {
+            "node": "Assemble Record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Assemble Record": {
+      "main": [
+        [
+          {
+            "node": "Save Draft to Airtable",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Draft to Airtable": {
+      "main": [
+        [
+          {
+            "node": "Update record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Request Approval in Slack": {
+      "main": [
+        [
+          {
+            "node": "Approved?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Approved?": {
+      "main": [
+        [
+          {
+            "node": "Mark Approved",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Mark Rejected",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mark Approved": {
+      "main": [
+        [
+          {
+            "node": "Publish to LinkedIn",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Publish to LinkedIn": {
+      "main": [
+        [
+          {
+            "node": "Mark Published",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mark Published": {
+      "main": [
+        [
+          {
+            "node": "Notify Published",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mark Rejected": {
+      "main": [
+        [
+          {
+            "node": "Notify Rejected",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Analyze Content",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Generate Platform Drafts",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Brief Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Analyze Content",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Drafts Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Generate Platform Drafts",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update record": {
+      "main": [
+        [
+          {
+            "node": "Request Approval in Slack",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "versionId": "7752ccde-94be-4414-92ed-71976966699e",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "261aecc82d79b48694ebf62797f43ce658f65ae7e3be9c11a6d601e05273af14"
+  },
+  "nodeGroups": [],
+  "id": "EjZmE9LRPYH56I2V",
+  "tags": []
+}
