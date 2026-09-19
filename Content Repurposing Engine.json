@@ -12,9 +12,15 @@
               "fieldType": "dropdown",
               "fieldOptions": {
                 "values": [
-                  { "option": "Article" },
-                  { "option": "YouTube" },
-                  { "option": "Paste Text" }
+                  {
+                    "option": "Article"
+                  },
+                  {
+                    "option": "YouTube"
+                  },
+                  {
+                    "option": "Paste Text"
+                  }
                 ]
               },
               "requiredField": true
@@ -47,7 +53,10 @@
       "name": "Content Intake Form",
       "type": "n8n-nodes-base.formTrigger",
       "typeVersion": 2.2,
-      "position": [-32, 832]
+      "position": [
+        -32,
+        832
+      ]
     },
     {
       "parameters": {
@@ -68,13 +77,11 @@
       "name": "Check for Duplicate",
       "type": "n8n-nodes-base.airtable",
       "typeVersion": 2.1,
-      "position": [192, 832],
-      "alwaysOutputData": true,
-      "credentials": {
-        "airtableTokenApi": {
-          "name": "Airtable Personal Access Token account"
-        }
-      }
+      "position": [
+        192,
+        832
+      ],
+      "alwaysOutputData": true
     },
     {
       "parameters": {
@@ -103,7 +110,10 @@
       "name": "Is New Content?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
-      "position": [416, 832]
+      "position": [
+        416,
+        832
+      ]
     },
     {
       "parameters": {
@@ -113,18 +123,16 @@
           "mode": "name",
           "value": "#content-approvals"
         },
-        "text": "=⏭️ Skipped — this source was already processed: {{ $('Content Intake Form').first().json['Source URL'] }}\nExisting record: https://airtable.com/REDACTED_APP_ID/REDACTED_TABLE_ID/{{ $json.id }}",
+        "text": "=⏭️ Skipped — this source was already processed: {{ $('Content Intake Form').first().json['Source URL'] }}\\nExisting record: https://airtable.com/REDACTED_APP_ID/REDACTED_TABLE_ID/{{ $json.id }}",
         "otherOptions": {}
       },
       "name": "Notify Duplicate",
       "type": "n8n-nodes-base.slack",
       "typeVersion": 2.3,
-      "position": [624, 1072],
-      "credentials": {
-        "slackApi": {
-          "name": "Slack account"
-        }
-      }
+      "position": [
+        624,
+        1072
+      ]
     },
     {
       "parameters": {
@@ -206,7 +214,10 @@
       "name": "Route by Source Type",
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.2,
-      "position": [624, 832]
+      "position": [
+        624,
+        832
+      ]
     },
     {
       "parameters": {
@@ -236,7 +247,10 @@
       "name": "Fetch Article Page",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [864, 640],
+      "position": [
+        864,
+        640
+      ],
       "retryOnFail": true,
       "maxTries": 3,
       "waitBetweenTries": 2000
@@ -268,7 +282,10 @@
       "name": "Extract Article Text",
       "type": "n8n-nodes-base.html",
       "typeVersion": 1.2,
-      "position": [1088, 640]
+      "position": [
+        1088,
+        640
+      ]
     },
     {
       "parameters": {
@@ -286,15 +303,7 @@
             }
           ]
         },
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "x-api-key",
-              "value": ""
-            }
-          ]
-        },
+        "sendHeaders": false,
         "options": {
           "timeout": 30000
         }
@@ -302,7 +311,10 @@
       "name": "Fetch YouTube Transcript",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [864, 832],
+      "position": [
+        864,
+        832
+      ],
       "retryOnFail": true,
       "maxTries": 3,
       "waitBetweenTries": 3000
@@ -314,7 +326,10 @@
       "name": "Normalize Content",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1312, 832]
+      "position": [
+        1312,
+        832
+      ]
     },
     {
       "parameters": {
@@ -328,7 +343,10 @@
       "name": "Analyze Content",
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.4,
-      "position": [1536, 832]
+      "position": [
+        1536,
+        832
+      ]
     },
     {
       "parameters": {
@@ -343,12 +361,10 @@
       "name": "Ollama Chat Model",
       "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
       "typeVersion": 1,
-      "position": [1728, 1088],
-      "credentials": {
-        "ollamaApi": {
-          "name": "Ollama account"
-        }
-      }
+      "position": [
+        1728,
+        1088
+      ]
     },
     {
       "parameters": {
@@ -358,7 +374,10 @@
       "name": "Brief Parser",
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.2,
-      "position": [1552, 1088]
+      "position": [
+        1552,
+        1088
+      ]
     },
     {
       "parameters": {
@@ -369,7 +388,10 @@
       "name": "Generate Platform Drafts",
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.4,
-      "position": [1888, 832]
+      "position": [
+        1888,
+        832
+      ]
     },
     {
       "parameters": {
@@ -379,7 +401,10 @@
       "name": "Drafts Parser",
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.2,
-      "position": [2048, 1088]
+      "position": [
+        2048,
+        1088
+      ]
     },
     {
       "parameters": {
@@ -388,7 +413,10 @@
       "name": "Assemble Record",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [2256, 832]
+      "position": [
+        2256,
+        832
+      ]
     },
     {
       "parameters": {
@@ -408,7 +436,9 @@
           "value": {
             "Source URL": "=   {{ $('Content Intake Form').item.json['Source URL'] }}"
           },
-          "matchingColumns": ["Source URL"],
+          "matchingColumns": [
+            "Source URL"
+          ],
           "schema": [
             {
               "id": "Record ID",
@@ -430,9 +460,18 @@
               "display": true,
               "type": "options",
               "options": [
-                { "name": "To do", "value": "To do" },
-                { "name": "In progress", "value": "In progress" },
-                { "name": "Done", "value": "Done" }
+                {
+                  "name": "To do",
+                  "value": "To do"
+                },
+                {
+                  "name": "In progress",
+                  "value": "In progress"
+                },
+                {
+                  "name": "Done",
+                  "value": "Done"
+                }
               ],
               "readOnly": false,
               "removed": false
@@ -490,12 +529,10 @@
       "name": "Save Draft to Airtable",
       "type": "n8n-nodes-base.airtable",
       "typeVersion": 2.1,
-      "position": [2464, 832],
-      "credentials": {
-        "airtableTokenApi": {
-          "name": "Airtable Personal Access Token account"
-        }
-      }
+      "position": [
+        2464,
+        832
+      ]
     },
     {
       "parameters": {
@@ -507,7 +544,7 @@
           "mode": "name",
           "value": "#content-approvals"
         },
-        "message": "=*New content ready for review*\n*{{ $('Assemble Record').first().json.Title }}*\nSource: {{ $('Assemble Record').first().json['Source URL'] || 'pasted text' }}\n{{ $('Assemble Record').first().json.Warnings ? '⚠️ ' + $('Assemble Record').first().json.Warnings.split('\\n').join(' · ') : '' }}\n\n*LinkedIn draft*\n{{ $('Assemble Record').first().json['LinkedIn Post'].slice(0, 1500) }}{{ $('Assemble Record').first().json['LinkedIn Post'].length > 1500 ? '…' : '' }}\n\nFull drafts (X thread, Instagram, newsletter, image prompts) are in Airtable:\nhttps://airtable.com/REDACTED_APP_ID/REDACTED_TABLE_ID/REDACTED_VIEW_ID{{ $json.id }}\n\nApproving publishes the LinkedIn post now. Rejecting archives the record.",
+        "message": "=*New content ready for review*\\n*{{ $('Assemble Record').first().json.Title }}*\\nSource: {{ $('Assemble Record').first().json['Source URL'] || 'pasted text' }}\\n{{ $('Assemble Record').first().json.Warnings ? '⚠️ ' + $('Assemble Record').first().json.Warnings.split('\\n').join(' · ') : '' }}\\n\\n*LinkedIn draft*\\n{{ $('Assemble Record').first().json['LinkedIn Post'].slice(0, 1500) }}{{ $('Assemble Record').first().json['LinkedIn Post'].length > 1500 ? '…' : '' }}\\n\\nFull drafts (X thread, Instagram, newsletter, image prompts) are in Airtable:\\nhttps://airtable.com/REDACTED_APP_ID/REDACTED_TABLE_ID/REDACTED_VIEW_ID{{ $json.id }}\\n\\nApproving publishes the LinkedIn post now. Rejecting archives the record.",
         "approvalOptions": {
           "values": {
             "approvalType": "double",
@@ -526,12 +563,10 @@
       "name": "Request Approval in Slack",
       "type": "n8n-nodes-base.slack",
       "typeVersion": 2.3,
-      "position": [2912, 832],
-      "credentials": {
-        "slackOAuth2Api": {
-          "name": "Slack account"
-        }
-      }
+      "position": [
+        2912,
+        832
+      ]
     },
     {
       "parameters": {
@@ -560,7 +595,10 @@
       "name": "Approved?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
-      "position": [3136, 832]
+      "position": [
+        3136,
+        832
+      ]
     },
     {
       "parameters": {
@@ -581,7 +619,9 @@
             "Source URL": "={{ $('Content Intake Form').item.json['Source URL'] }}",
             "Record ID": "={{ $('Save Draft to Airtable').first().json.id }}"
           },
-          "matchingColumns": ["Record ID"],
+          "matchingColumns": [
+            "Record ID"
+          ],
           "schema": [
             {
               "id": "id",
@@ -626,12 +666,10 @@
       "name": "Mark Approved",
       "type": "n8n-nodes-base.airtable",
       "typeVersion": 2.1,
-      "position": [3360, 720],
-      "credentials": {
-        "airtableTokenApi": {
-          "name": "Airtable Personal Access Token account"
-        }
-      }
+      "position": [
+        3360,
+        720
+      ]
     },
     {
       "parameters": {
@@ -642,12 +680,10 @@
       "name": "Publish to LinkedIn",
       "type": "n8n-nodes-base.linkedIn",
       "typeVersion": 1,
-      "position": [3568, 720],
-      "credentials": {
-        "linkedInOAuth2Api": {
-          "name": "LinkedIn account"
-        }
-      }
+      "position": [
+        3568,
+        720
+      ]
     },
     {
       "parameters": {
@@ -710,12 +746,10 @@
       "name": "Mark Published",
       "type": "n8n-nodes-base.airtable",
       "typeVersion": 2.1,
-      "position": [3792, 720],
-      "credentials": {
-        "airtableTokenApi": {
-          "name": "Airtable Personal Access Token account"
-        }
-      }
+      "position": [
+        3792,
+        720
+      ]
     },
     {
       "parameters": {
@@ -726,18 +760,16 @@
           "mode": "name",
           "value": "#content-approvals"
         },
-        "text": "=✅ Published to LinkedIn: *{{ $('Assemble Record').first().json.Title }}*\nThe X thread, Instagram caption, and newsletter blurb are marked Published in Airtable and ready to schedule.",
+        "text": "=✅ Published to LinkedIn: *{{ $('Assemble Record').first().json.Title }}*\\nThe X thread, Instagram caption, and newsletter blurb are marked Published in Airtable and ready to schedule.",
         "otherOptions": {}
       },
       "name": "Notify Published",
       "type": "n8n-nodes-base.slack",
       "typeVersion": 2.3,
-      "position": [4016, 720],
-      "credentials": {
-        "slackOAuth2Api": {
-          "name": "Slack account"
-        }
-      }
+      "position": [
+        4016,
+        720
+      ]
     },
     {
       "parameters": {
@@ -758,7 +790,9 @@
             "Record ID": "={{ $('Save Draft to Airtable').first().json.id }}",
             "Source URL": "={{ $('Content Intake Form').item.json['Source URL'] }}"
           },
-          "matchingColumns": ["Record ID"],
+          "matchingColumns": [
+            "Record ID"
+          ],
           "schema": [
             {
               "id": "id",
@@ -803,12 +837,10 @@
       "name": "Mark Rejected",
       "type": "n8n-nodes-base.airtable",
       "typeVersion": 2.1,
-      "position": [3360, 976],
-      "credentials": {
-        "airtableTokenApi": {
-          "name": "Airtable Personal Access Token account"
-        }
-      }
+      "position": [
+        3360,
+        976
+      ]
     },
     {
       "parameters": {
@@ -825,12 +857,10 @@
       "name": "Notify Rejected",
       "type": "n8n-nodes-base.slack",
       "typeVersion": 2.3,
-      "position": [3568, 976],
-      "credentials": {
-        "slackOAuth2Api": {
-          "name": "Slack account"
-        }
-      }
+      "position": [
+        3568,
+        976
+      ]
     },
     {
       "parameters": {
@@ -851,7 +881,9 @@
             "Source URL": "={{ $json.fields['Source URL'] }}",
             "Record ID": "={{ $json.id }}"
           },
-          "matchingColumns": ["Source URL"],
+          "matchingColumns": [
+            "Source URL"
+          ],
           "schema": [
             {
               "id": "id",
@@ -893,13 +925,11 @@
       },
       "type": "n8n-nodes-base.airtable",
       "typeVersion": 2.2,
-      "position": [2688, 832],
-      "name": "Update record",
-      "credentials": {
-        "airtableTokenApi": {
-          "name": "Airtable Personal Access Token account"
-        }
-      }
+      "position": [
+        2688,
+        832
+      ],
+      "name": "Update record"
     }
   ],
   "pinData": {},
@@ -1187,13 +1217,5 @@
     "timeSavedMode": "fixed",
     "callerPolicy": "workflowsFromSameOwner",
     "availableInMCP": false
-  },
-  "versionId": "REDACTED_VERSION_ID",
-  "meta": {
-    "templateCredsSetupCompleted": true,
-    "instanceId": "REDACTED_INSTANCE_ID"
-  },
-  "nodeGroups": [],
-  "id": "REDACTED_WORKFLOW_ID",
-  "tags": []
+  }
 }
